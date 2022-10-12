@@ -163,24 +163,18 @@ procedure Puissance4(Tableau: in T_Tableau) is
     type T_Etat_Colonnes is (LIBRE, OCCUPE);
     
     -- On regarde si on peut jouer sur une certaine colonne avec un système de compteur sur chaque colonne
-    procedure Coup_Est_Possible(Grille: in T_Grille; Colonnes: in out T_Colonnes; Etat_Colonne: in T_Etat_Colonne; Piece: in T_Piece) is
+    function Coup_Est_Possible(Grille: in T_Grille; Colonne: in Integer; Etat_Colonne: in T_Etat_Colonne; Piece: in T_Piece) return Boolean is
         Compteur : Integer := 0;
     begin
-        for column in 1..Grille.nb_colonnes loop
-            Compteur := 0;
-            for row in 1..Grille.nb_lignes loop
-                if (Piece /= VIDE) then
-                    Compteur := Compteur + 1;
-                else
-                    null;
-                end if;
-            end loop;
-            if Compteur = 6 then
-                Tableau(Colonnes) := OCCUPE;
-                Put("La colonne est ❌ occupée.");
+        Compteur := 0;
+        for row in 1..Grille.nb_lignes loop
+            if (Piece /= VIDE) then
+                Compteur := Compteur + 1;
             else
-                Put("La colonne est ✅ libre.");
-            end if;        end loop;
+                null;
+            end if;
+        end loop;
+        return Compteur = Grille.nb_lignes;
     end Coup_Est_Possible;
     
     -- Exercice 5
@@ -188,10 +182,10 @@ procedure Puissance4(Tableau: in T_Tableau) is
         Piece: T_Piece;
         Colonne: Integer;
     begin
-        Put("Dans quelle colonne voulez-vous lâcher la pièce ? 🤔");
+        Put("Dans quelle colonne voulez-vous lâcher la pièce ?");
         Get(Colonne);
         while Colonne = OCCUPE loop
-            Put("Cette colonne est occupée 🤯, veuillez en choisir une autre ! 🤬");
+            Put("Cette colonne est occupée, veuillez en choisir une autre !");
             Get(Colonne);
         end loop;
 
@@ -200,8 +194,15 @@ procedure Puissance4(Tableau: in T_Tableau) is
 
     -- Exercice 6
     procedure Compter_Jetons_Alignes(Grille: in T_Grille) is
-        coord_x: Integer;
-        coord_y: Integer;
+
+        -- coordonnées du jeton choisi par l'utilisateur
+        jeton_y: Integer; 
+        jeton_x: Integer;
+        
+        -- coordonnées du jeton que l'on compare au jeton choisi actuellement
+        check_y: Integer;
+        check_x: Integer;
+        
         Jeton: T_Jeton;
         AlignementVersGauche: Integer;
         AlignementVersDroite: Integer;
@@ -211,19 +212,45 @@ procedure Puissance4(Tableau: in T_Tableau) is
         AlignementVersGaucheBas: Integer;
         AlignementVersDroiteHaut: Integer;
         AlignementVersDroite: Integer;
+        
     begin
-        Put("Quelle est le jeton dont vous voulez observer l'alignement le plus long 🧐 ?");
+        Put("Quelle est le jeton dont vous voulez observer l'alignement le plus long ?");
         Put("Coordonnée x");
-        Get(coord_x);
+        Get(jeton_y);
         Put("Coordonnée y");
-        Get(coord_y);
+        Get(jeton_x);
+        check_x := jeton_x;
+        check_y := jeton_y;
 
         Jeton := Grille(coord_x, coord_y);
 
-        if Jeton.Value = VIDE
+        if Jeton.Value = VIDE then Put_Line("Veuillez choisir une case occupée!"); end if;
 
         -- Recherche vers le haut
-        while 
+        while Grille(check_x, check_y).Value = Jeton.Value and check_y > 1 loop
+            check_y := check_y - 1;
+            AlignementVersHaut := AlignementVersHaut + 1;
+        end loop;
+
+        -- Recherche vers la diagonale droite/haut
+        while Grille(check_x, check_y).Value = Jeton.Value and check_x < nb_colonnes and check_y > 1 loop
+            check_y := check_y - 1;
+            check_x := check_x + 1;
+            AlignementVersHaut := AlignementVersHaut + 1;
+        end loop;
+
+        -- Recherche vers la droite
+        while Grille(check_x, check_y).Value = Jeton.Value and check_y > 1 loop
+            check_y := check_y - 1;
+            AlignementVersHaut := AlignementVersHaut + 1;
+        end loop;
+
+        -- Recherche vers le bas
+        while Grille(check_x, check_y).Value = Jeton.Value and check_y < nb_lignes loop
+            check_y := check_y + 1;
+            AlignementVersBas := AlignementVersBas + 1;
+        end loop;
+
 
     end Compter_Jetons_Alignes;
 
